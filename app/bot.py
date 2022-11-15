@@ -18,26 +18,25 @@ def send_to_telegram(message):
 def main():
     load_dotenv()
     DELAY = int(env.get('DELAY'))
-    URLs = {url: {'status': True} for url in [url for url in env.get("URLS").split(" ")] if url}
+    URLs = {url: {'is_online': True} for url in [url for url in env.get("URLS").split(" ")] if url}
 
     while True:
         for url, status in URLs.items():
             try:
                 response = requests.get(f'https://{url}', timeout=DELAY)
-                if not response.ok and status["status"]:
+                if not response.ok and status["is_online"]:
                     send_to_telegram(f'WARNING: сайт https://{url} перестал работать!')
                     print(f'WARNING: {url} is down!')
-                    status["status"] = False
-                if response.ok and not status["status"]:
+                    status["is_online"] = False
+                if response.ok and not status["is_online"]:
                     send_to_telegram(f'INFO: сайт https://{url} снова работает!')
                     print(f'INFO: https://{url} is UP!')
-                    status["status"] = True
+                    status["is_online"] = True
             except:
-                if status["status"]:
+                if status["is_online"]:
                     send_to_telegram(f'WARNING: сайт https://{url} слишком долго не открывается!')
                     print(f'WARNING: https://{url} TIMEOUT!')
-                status["status"] = False
-            # print(f'{url} -> {status["status"]}')
+                status["is_online"] = False
         sleep(DELAY)
 
 
